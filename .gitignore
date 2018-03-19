@@ -1,0 +1,8 @@
+Words/*
+Words_Test/*
+*.out
+*.zip
+*.sublime-*
+LOG_*
+
+!Words/example.txt
