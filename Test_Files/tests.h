@@ -19,10 +19,6 @@ void test_replace_in_string(void);
 #define RUN_TEST_REPLACE_IN_STRING 1
 
 
-/* Helpers for tests */
-void list_words(Dictionary dictionary);
-
-
 void
 run_tests(void)
 {
@@ -127,17 +123,4 @@ test_replace_in_string(void)
 	printf("  New string: %s\n", new_string);
 
 	printf("\n");
-}
-
-
-void
-list_words(Dictionary dictionary)
-{
-	printf("  In dictionary %s:\n", dictionary.name);
-
-	int i;
-	for(i = 0; i < dictionary.word_count; i++)
-	{
-		printf("    Line %d: %s\n", i+1, dictionary.words[i]);
-	}
 }

@@ -11,6 +11,38 @@ struct dictionary
 };
 typedef struct dictionary Dictionary;
 
+struct dictionary_collection
+{
+	int dictionary_count;
+	Dictionary *dictionaries;
+};
+typedef struct dictionary_collection DictionaryCollection;
+
+
+void
+list_words(Dictionary dictionary)
+{
+	printf("  In dictionary %s:\n", dictionary.name);
+
+	int i;
+	for(i = 0; i < dictionary.word_count; ++i)
+	{
+		printf("    Line %d: %s\n", i+1, dictionary.words[i]);
+	}
+}
+
+
+void
+list_dictionaries(DictionaryCollection dc)
+{
+	printf("  In dictionary collection:\n");
+
+	int i;
+	for (i = 0; i < dc.dictionary_count; ++i)
+	{
+		printf("    Dictionary %d: %s\n", i+1, dc.dictionaries[i].name);
+	}
+}
 
 Dictionary
 create_dict_from_file(char *directory, char *filename)
@@ -21,7 +53,6 @@ create_dict_from_file(char *directory, char *filename)
 	/* Allocate space for words */
 
 	char **words = (char **)malloc(sizeof(char*)*lines_allocated);
-	
 	if (words == NULL)
 	{
 		fprintf(stderr, "Out of memory (1).\n");
@@ -107,18 +138,21 @@ create_dict_from_file(char *directory, char *filename)
 
 
 void
-populate_dictionaries(Dictionary *dictionaries, char *directory)
+populate_dictionaries(DictionaryCollection *dc, char *directory)
 {
 	DIR *d;
 	struct dirent *dir;
 
 	d = opendir(directory);
 
-	#if DEBUG
-		/**/
-		int count = 0;
-		/**/
-	#endif
+	int opened_file_count = 0;
+
+	dc->dictionaries = (Dictionary *)malloc(sizeof(Dictionary)*0);
+	if (dc->dictionaries == NULL)
+	{
+		fprintf(stderr, "Out of memory (1).\n");
+		exit(1);
+	}
 
 	if (d)
 	{
@@ -126,18 +160,26 @@ populate_dictionaries(Dictionary *dictionaries, char *directory)
 		{
 			if (*dir->d_name != '.')
 			{
+				++opened_file_count;
+
 				#if DEBUG
 					/**/
-					count++;
-					printf("File number %d\n", count);
-
+					printf("File number %d\n", opened_file_count);
 					printf("Attempting to create dict from %s\n", dir->d_name);
 					/**/
 				#endif
 
-				/*Dictionary dictionary = create_dict_from_file(directory, dir->d_name);*/
 				Dictionary dictionary = create_dict_from_file(directory, dir->d_name);
-				dictionaries[0] = dictionary;
+				
+				/* Make sure size of dc is appropriate */
+				dc->dictionaries = (Dictionary *)realloc(dc->dictionaries, sizeof(Dictionary)*opened_file_count);
+				if (dc->dictionaries == NULL)
+				{
+					fprintf(stderr, "Out of memory.\n");
+					exit(3);
+				}
+
+				dc->dictionaries[opened_file_count-1] = dictionary;
 
 				#if DEBUG
 					/**/
@@ -145,9 +187,9 @@ populate_dictionaries(Dictionary *dictionaries, char *directory)
 					/**/
 				#endif
 			}
-
 		}
 	}
 
+	dc->dictionary_count = opened_file_count;
 	closedir(d);
 }

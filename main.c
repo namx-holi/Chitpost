@@ -25,11 +25,10 @@ main(void)
 	#if RUN
 		/**/
 
-		/* The dictionary array size needs to be dynamic */
-		Dictionary dictionaries[10];
-		populate_dictionaries(dictionaries, "Words/");
+		DictionaryCollection dictionary_collection;
+		populate_dictionaries(&dictionary_collection, "Words/");
 
-		list_words(dictionaries[0]);
+		list_dictionaries(dictionary_collection);
 		/**/
 	#endif
 
