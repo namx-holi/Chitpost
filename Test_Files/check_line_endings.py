@@ -13,7 +13,7 @@ Just displays each character and the bytes of the character
 
 filename = raw_input("Filename: ")
 
-f = open("Words/"+filename, "r")
+f = open("../Words/"+filename, "r")
 text = f.read()
 f.close()
 

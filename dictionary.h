@@ -44,6 +44,7 @@ list_dictionaries(DictionaryCollection dc)
 	}
 }
 
+
 Dictionary
 create_dict_from_file(char *directory, char *filename)
 {
@@ -192,4 +193,13 @@ populate_dictionaries(DictionaryCollection *dc, char *directory)
 
 	dc->dictionary_count = opened_file_count;
 	closedir(d);
+}
+
+
+char *
+pick_word_from_dictionary(Dictionary dictionary)
+{
+	int index = rand_int(dictionary.word_count);
+
+	return dictionary.words[index];
 }

@@ -41,3 +41,27 @@ replace_in_string(char *str, char *replace_str, char *with_str)
 
 	return str;
 }
+
+
+int
+rand_int(int max_num)
+{
+	/*
+	Generates random int x that fits
+	0 <= x < max_num
+	*/
+
+	unsigned int
+		num_bins = (unsigned int) max_num,
+		num_rand = (unsigned int) RAND_MAX,
+		bin_size = num_rand / num_bins,
+		defect   = num_rand % num_bins;
+
+	int x;
+
+	do {
+		x = rand();
+	} while (num_rand - defect <= (unsigned int)x);
+
+	return x/bin_size;
+}

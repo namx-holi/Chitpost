@@ -1,6 +1,6 @@
 
-#define WORDS_DIRECTORY "/home/namu/Documents/C/Chitpost2/Words"
-#define TEST_DIRECTORY "/home/namu/Documents/C/Chitpost2/Test_Files/"
+#define WORDS_DIRECTORY "./Words"
+#define TEST_DIRECTORY "./Test_Files/"
 
 /* test stripping .txt and other extensions from filenames */
 void test_strip_extension(void);
@@ -12,11 +12,15 @@ void test_read_directory_tree(void);
 
 /* test creating dictionaries from a file */
 void test_create_dict_from_file(void);
-#define RUN_TEST_CREATE_DICT_FROM_FILE 0
+#define RUN_TEST_CREATE_DICT_FROM_FILE 1
 
 /* test for replacing strings of characters in a string */
 void test_replace_in_string(void);
-#define RUN_TEST_REPLACE_IN_STRING 1
+#define RUN_TEST_REPLACE_IN_STRING 0
+
+/* test the generation of random numbers */
+void test_pick_word_from_dictionary(void);
+#define TEST_PICK_WORD_FROM_DICTIONARY 1
 
 
 void
@@ -27,15 +31,19 @@ run_tests(void)
 	#endif
 
 	#if RUN_TEST_READ_DIRECTORY_TREE
-	test_create_dict_from_file();
+	test_read_directory_tree();
 	#endif
 
 	#if RUN_TEST_CREATE_DICT_FROM_FILE
-	test_read_directory_tree();
+	test_create_dict_from_file();
 	#endif
 
 	#if RUN_TEST_REPLACE_IN_STRING
 	test_replace_in_string();
+	#endif
+
+	#if TEST_PICK_WORD_FROM_DICTIONARY
+	test_pick_word_from_dictionary();
 	#endif
 }
 
@@ -121,6 +129,30 @@ test_replace_in_string(void)
 
 	char *new_string = replace_in_string(original_string, string_to_replace, replacing_string_with);
 	printf("  New string: %s\n", new_string);
+
+	printf("\n");
+}
+
+
+void
+test_pick_word_from_dictionary(void)
+{
+	printf("Testing pick_word_from_dictionary\n");
+
+	printf("  Creating dict from test_file.txt\n");
+	char directory[] = TEST_DIRECTORY;
+	char filename[] = "test_file.txt";
+	Dictionary dictionary = create_dict_from_file(directory, filename);
+
+	printf("  Picking 10 random lines:\n");
+	char *result;
+
+	int i;
+	for (i = 0; i < 10; ++i)
+	{
+		result = pick_word_from_dictionary(dictionary);
+		printf("    Result %d: %s\n", i, result);
+	}
 
 	printf("\n");
 }

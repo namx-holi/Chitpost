@@ -25,7 +25,7 @@ max_lines = int(max_lines)
 min_line_length = int(min_line_length)
 max_line_length = int(max_line_length)
 
-directory = "Words_Test"
+directory = "../Words_Test"
 
 file_number_length = int(ceil(log10(number_of_files+1)))
 
