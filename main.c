@@ -8,11 +8,12 @@
 
 #include "helpers.h"
 #include "dictionary.h"
+#include "cleanup.c"
 #include "Test_Files/tests.h"
 
 
 #define RUN_TESTS 1
-#define RUN 0
+#define RUN 1
 
 
 void init_random(void);
@@ -36,6 +37,10 @@ main(void)
 		populate_dictionaries(&dictionary_collection, "Words/");
 
 		list_dictionaries(dictionary_collection);
+
+		/* Free memory from dictionary_collection */
+		free_dictionary_collection(&dictionary_collection);
+
 		/**/
 	#endif
 

@@ -45,16 +45,16 @@ list_dictionaries(DictionaryCollection dc)
 }
 
 
-Dictionary
-create_dict_from_file(char *directory, char *filename)
+void
+populate_dict_from_file(Dictionary *d, char *directory, char *filename)
 {
 	int lines_allocated = 4;
 	int max_line_len = MAX_LINE_LENGTH;
 
 	/* Allocate space for words */
 
-	char **words = (char **)malloc(sizeof(char*)*lines_allocated);
-	if (words == NULL)
+	d->words = (char **)malloc(sizeof(char*)*lines_allocated);
+	if (d->words == NULL)
 	{
 		fprintf(stderr, "Out of memory (1).\n");
 		exit(1);
@@ -86,8 +86,8 @@ create_dict_from_file(char *directory, char *filename)
 			/* Double our allocation and re-allocate */
 			new_size = lines_allocated*2;
 
-			words = (char **)realloc(words, sizeof(char*)*new_size);
-			if (words == NULL)
+			d->words = (char **)realloc(d->words, sizeof(char*)*new_size);
+			if (d->words == NULL)
 			{
 				fprintf(stderr, "Out of memory.\n");
 				exit(3);
@@ -97,25 +97,25 @@ create_dict_from_file(char *directory, char *filename)
 		}
 
 		/* Allocate space for next line */
-		words[i] = malloc(sizeof(char*)*max_line_len);
-		if (words[i] == NULL)
+		d->words[i] = malloc(sizeof(char*)*max_line_len);
+		if (d->words[i] == NULL)
 		{
 			fprintf(stderr, "Out of memory (3).\n");
 			exit(4);
 		}
 
-		if (fgets(words[i], max_line_len-1, fp) == NULL)
+		if (fgets(d->words[i], max_line_len-1, fp) == NULL)
 		{
 			break;
 		}
 
 		/* Get rid of CR or LF at end of line */
-		for (j=strlen(words[i])-1;
-			j>=0 && (words[i][j]=='\n' ||
-				words[i][j]=='\r');
+		for (j=strlen(d->words[i])-1;
+			j>=0 && (d->words[i][j]=='\n' ||
+				d->words[i][j]=='\r');
 			j--)
 			;
-		words[i][j+1]='\0';
+		d->words[i][j+1]='\0';
 	}
 
 	/* Close file */
@@ -126,15 +126,10 @@ create_dict_from_file(char *directory, char *filename)
 	char *name = basename(filename);
 	strip_extension(name);
 
-	Dictionary dictionary;
-
-	strcpy(dictionary.name, name);
-	dictionary.word_count = lines_allocated;
-	dictionary.words = words;
+	strcpy(d->name, name);
+	d->word_count = lines_allocated;
 
 	free(fullpath);
-
-	return dictionary;
 }
 
 
@@ -170,7 +165,8 @@ populate_dictionaries(DictionaryCollection *dc, char *directory)
 					/**/
 				#endif
 
-				Dictionary dictionary = create_dict_from_file(directory, dir->d_name);
+				Dictionary dictionary;
+				populate_dict_from_file(&dictionary, directory, dir->d_name);
 				
 				/* Make sure size of dc is appropriate */
 				dc->dictionaries = (Dictionary *)realloc(dc->dictionaries, sizeof(Dictionary)*opened_file_count);
