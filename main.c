@@ -15,16 +15,21 @@
 #define RUN_TESTS 1
 #define RUN 1
 
+#define SEED 123456
+
 
 void init_random(void);
 void init_random_with_seed(int seed);
 
 
-
 int
 main(void)
 {
+	#ifdef SEED
+	init_random_with_seed(SEED);
+	#else
 	init_random();
+	#endif
 
 	#if RUN_TESTS
 	run_tests();
