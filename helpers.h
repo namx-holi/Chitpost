@@ -17,19 +17,19 @@ strip_extension(char *filename)
 }
 
 
-char *
-replace_in_string(char *str, char *replace_str, char *with_str)
+int
+replace_in_string(char **str, char *replace_str, char *with_str)
 {
 	static char temp[4096];
 	static char buffer[4096];
 	char *p;
 
-	strcpy(temp, str);
+	strcpy(temp, *str);
 
 	/* Is replace_str even in temp? */
 	if (!(p = strstr(temp, replace_str)))
 	{
-		return temp;
+		return 0;
 	}
 
 	/* Copy characters from temp start to replace_str */
@@ -37,9 +37,24 @@ replace_in_string(char *str, char *replace_str, char *with_str)
 	buffer[p-temp] = '\0';
 
 	sprintf(buffer + (p - temp), "%s%s", with_str, p+strlen(replace_str));
-	sprintf(str, "%s", buffer);
+	sprintf(temp, "%s", buffer);
 
-	return str;
+	*str = temp;
+
+	return 1;
+}
+
+
+int
+replace_all(char **str, char *replace_str, char *with_str)
+{
+	int replaced = 0;
+
+	do {
+		replaced = replace_in_string(str, replace_str, with_str);
+	} while (replaced == 1);
+
+	return replaced;
 }
 
 

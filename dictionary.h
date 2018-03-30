@@ -1,6 +1,6 @@
 
 #define MAX_LINE_LENGTH 512
-#define DEBUG 0
+#define LOG_DICTIONARY 0
 
 
 struct dictionary
@@ -158,7 +158,7 @@ populate_dictionaries(DictionaryCollection *dc, char *directory)
 			{
 				++opened_file_count;
 
-				#if DEBUG
+				#if LOG_DICTIONARY
 					/**/
 					printf("File number %d\n", opened_file_count);
 					printf("Attempting to create dict from %s\n", dir->d_name);
@@ -178,7 +178,7 @@ populate_dictionaries(DictionaryCollection *dc, char *directory)
 
 				dc->dictionaries[opened_file_count-1] = dictionary;
 
-				#if DEBUG
+				#if LOG_DICTIONARY
 					/**/
 					printf("Created dict from %s\n\n", dir->d_name);
 					/**/
@@ -198,4 +198,107 @@ pick_word_from_dictionary(Dictionary dictionary)
 	int index = rand_int(dictionary.word_count);
 
 	return dictionary.words[index];
+}
+
+
+Dictionary
+find_dict(DictionaryCollection dc, char *dict_name)
+{
+	int i;
+	for (i = 0; i < dc.dictionary_count; ++i)
+	{
+		if (strcmp(dc.dictionaries[i].name, dict_name) == 0)
+		{
+			return dc.dictionaries[i];
+		}
+	}
+	return dc.dictionaries[0];
+}
+
+
+int
+replace_next_placeholder(DictionaryCollection dc, char **sentence)
+{
+	static char temp[4096];
+	static char replace_str[4096];
+	static char dict_name[4096];
+
+	char *placeholder_start;
+	char *placeholder_end;
+
+	strcpy(temp, *sentence);
+
+	/* Look for mem loc of opening % */
+	if (!(placeholder_start = strstr(temp, "%")))
+	{
+		return 0;
+	}
+
+	/* Look for mem loc of closing % */
+	if (!(placeholder_end = strstr(placeholder_start+1, "%")))
+	{
+		return 0;
+	}
+
+	/* copy the string we are replacing into replace_str */
+	strncpy(replace_str, placeholder_start, 1+placeholder_end-placeholder_start);
+	replace_str[1+placeholder_end-placeholder_start] = '\0';
+
+	if (strcmp(replace_str, "%nul%") == 0)
+	{
+		replace_in_string(sentence, replace_str, "");
+		#if LOG_DICTIONARY
+			/**/
+			printf("[LOG_DICTIONARY] Sentence is now: %s\n", *sentence);
+			/**/
+		#endif
+
+		return 1;
+	}
+
+	/* copy the name of the dictionary to open into dict_name */
+	strncpy(dict_name, placeholder_start+1, placeholder_end-placeholder_start-1);
+	dict_name[placeholder_end-placeholder_start-1] = '\0';
+
+	/* pick a word from dictionary named */
+	char *with_str;
+	with_str = pick_word_from_dictionary(find_dict(dc, dict_name));
+
+	replace_in_string(sentence, replace_str, with_str);
+	#if LOG_DICTIONARY
+		/**/
+		printf("[LOG_DICTIONARY] Sentence is now: %s\n", *sentence);
+		/**/
+	#endif
+
+	return 1;
+}
+
+
+char *
+generate_sentence(DictionaryCollection dc)
+{
+	/* Base sentence is always from base.txt */
+	char *sentence;
+	sentence = pick_word_from_dictionary(find_dict(dc, "base"));
+
+	int replaced = 1;
+
+	int count = 0;
+	while (replaced == 1)
+	{
+		replaced = replace_next_placeholder(dc, &sentence);
+		count++;
+
+		if (count > 1000)
+		{
+			printf("too many\n");
+			return sentence;
+		}
+	}
+
+	replace_all(&sentence, "||", " ");
+	replace_all(&sentence, "|", "");
+
+	return sentence;
 }

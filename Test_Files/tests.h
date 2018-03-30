@@ -12,7 +12,7 @@ void test_read_directory_tree(void);
 
 /* test creating dictionaries from a file */
 void test_populate_dict_from_file(void);
-#define RUN_TEST_POPULATE_DICT_FROM_FILE 1
+#define RUN_TEST_POPULATE_DICT_FROM_FILE 0
 
 /* test for replacing strings of characters in a string */
 void test_replace_in_string(void);
@@ -21,6 +21,14 @@ void test_replace_in_string(void);
 /* test the generation of random numbers */
 void test_pick_word_from_dictionary(void);
 #define TEST_PICK_WORD_FROM_DICTIONARY 0
+
+/* test replacing placeholders in a sentence */
+void test_replace_next_placeholder(void);
+#define TEST_REPLACE_NEXT_PLACEHOLDER 1
+
+/* test generating a sentence from scratch */
+void test_generate_sentence(void);
+#define TEST_GENERATE_SENTENCE 1
 
 
 void
@@ -44,6 +52,14 @@ run_tests(void)
 
 	#if TEST_PICK_WORD_FROM_DICTIONARY
 	test_pick_word_from_dictionary();
+	#endif
+
+	#if TEST_REPLACE_NEXT_PLACEHOLDER
+	test_replace_next_placeholder();
+	#endif
+
+	#if TEST_GENERATE_SENTENCE
+	test_generate_sentence();
 	#endif
 }
 
@@ -121,15 +137,15 @@ test_replace_in_string(void)
 {
 	printf("Testing replace_in_string\n");
 
-	char original_string[] = "Hello, World!";
-	char string_to_replace[] = "llo";
-	char replacing_string_with[] = "nlon";
+	char *original_string = "Hello, World!";
+	char *string_to_replace = "llo";
+	char *replacing_string_with = "nlon";
 	printf("  Original string: %s\n", original_string);
 	printf("  Replacing: %s\n", string_to_replace);
 	printf("  With: %s\n", replacing_string_with);
 
-	char *new_string = replace_in_string(original_string, string_to_replace, replacing_string_with);
-	printf("  New string: %s\n", new_string);
+	replace_in_string(&original_string, string_to_replace, replacing_string_with);
+	printf("  New string: %s\n", original_string);
 
 	printf("\n");
 }
@@ -155,6 +171,46 @@ test_pick_word_from_dictionary(void)
 		result = pick_word_from_dictionary(dictionary);
 		printf("    Result %d: %s\n", i+1, result);
 	}
+
+	printf("\n");
+}
+
+
+void
+test_replace_next_placeholder(void)
+{
+	printf("Testing replace_next_placeholder\n");
+
+	printf("  Creating dict collection from Words/\n");
+	DictionaryCollection dictionary_collection;
+	populate_dictionaries(&dictionary_collection, "Words/");
+
+	printf("  Setting test string to replace from\n");
+	char *sentence = "Hello, %sentence% is the line picked.";
+	printf("  Sentence is currently: %s\n", sentence);
+
+	replace_next_placeholder(dictionary_collection, &sentence);
+	printf("  Sentence is now: %s\n", sentence);
+
+	/* Free memory from dictionary_collection */
+	free_dictionary_collection(&dictionary_collection);
+
+	printf("\n");
+}
+
+
+void
+test_generate_sentence(void)
+{
+	printf("Testing generate_sentence\n");
+
+	printf("  Creating dict collection from Words/\n");
+	DictionaryCollection dictionary_collection;
+	populate_dictionaries(&dictionary_collection, "Words/");
+
+	printf("  Generating sentence\n");
+	char *sentence = generate_sentence(dictionary_collection);
+	printf("  Sentence is: %s\n", sentence);
 
 	printf("\n");
 }
